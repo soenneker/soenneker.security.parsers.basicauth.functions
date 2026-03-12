@@ -4,10 +4,11 @@
   </Folder>
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/build-and-test.yml" />
+    <File Path=".github/workflows/codeql.yml" />
     <File Path=".github/workflows/publish-package.yml" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Soenneker.Security.Parsers.BasicAuth.Functions.csproj" />
+    <Project Path="src/Soenneker.Security.Parsers.BasicAuth.Functions/Soenneker.Security.Parsers.BasicAuth.Functions.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Soenneker.Security.Parsers.BasicAuth.Functions.Tests/Soenneker.Security.Parsers.BasicAuth.Functions.Tests.csproj" />

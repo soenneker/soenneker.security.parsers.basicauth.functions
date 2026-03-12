@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Security.Parsers.BasicAuth.Functions.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Security.Parsers.BasicAuth.Functions\Soenneker.Security.Parsers.BasicAuth.Functions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
