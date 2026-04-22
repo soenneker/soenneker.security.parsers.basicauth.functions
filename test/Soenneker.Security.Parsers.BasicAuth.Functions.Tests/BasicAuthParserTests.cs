@@ -1,16 +1,15 @@
-﻿using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Security.Parsers.BasicAuth.Functions.Tests;
 
-[Collection("Collection")]
-public sealed class BasicAuthParserTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class BasicAuthParserTests : HostedUnitTest
 {
-    public BasicAuthParserTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public BasicAuthParserTests(Host host) : base(host)
     {
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
