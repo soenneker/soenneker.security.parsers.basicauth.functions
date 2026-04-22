@@ -38,7 +38,7 @@ jobs:
         run: dotnet build test/Soenneker.Security.Parsers.BasicAuth.Functions.Tests/Soenneker.Security.Parsers.BasicAuth.Functions.Tests.csproj --configuration Release --no-restore --verbosity minimal
 
       - name: Test
-        run: dotnet test test/Soenneker.Security.Parsers.BasicAuth.Functions.Tests/Soenneker.Security.Parsers.BasicAuth.Functions.Tests.csproj --configuration Release --no-build --no-restore --verbosity minimal
+        run: dotnet test --project test/Soenneker.Security.Parsers.BasicAuth.Functions.Tests/Soenneker.Security.Parsers.BasicAuth.Functions.Tests.csproj --configuration Release --no-build --no-restore --verbosity minimal
 
       - name: Pack
         run: dotnet pack src/Soenneker.Security.Parsers.BasicAuth.Functions/Soenneker.Security.Parsers.BasicAuth.Functions.csproj --configuration Release --no-build --no-restore --output . --verbosity minimal
