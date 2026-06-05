@@ -15,6 +15,14 @@ public static class BasicAuthParser
     // Optional sanity cap to avoid giant headers (8KB of Base64 ~ 6KB bytes)
     private const int _maxBase64Chars = 8 * 1024;
 
+    /// <summary>
+    /// Attempts to execute read basic credentials.
+    /// </summary>
+    /// <param name="request">The request.</param>
+    /// <param name="username">The username.</param>
+    /// <param name="password">The password.</param>
+    /// <param name="charBufferToClear">The char buffer to clear.</param>
+    /// <returns>A value indicating whether the operation succeeded.</returns>
     public static bool TryReadBasicCredentials(HttpRequestData request, out ReadOnlySpan<char> username, out ReadOnlySpan<char> password,
         out char[]? charBufferToClear)
     {
@@ -82,6 +90,10 @@ public static class BasicAuthParser
         }
     }
 
+    /// <summary>
+    /// Executes the clear operation.
+    /// </summary>
+    /// <param name="charBuffer">The char buffer.</param>
     public static void Clear(char[]? charBuffer)
     {
         if (charBuffer is null)
