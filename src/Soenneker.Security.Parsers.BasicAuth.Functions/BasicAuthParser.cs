@@ -16,13 +16,13 @@ public static class BasicAuthParser
     private const int _maxBase64Chars = 8 * 1024;
 
     /// <summary>
-    /// Attempts to execute read basic credentials.
+    /// Attempts to decode Basic authentication credentials from the request Authorization header.
     /// </summary>
-    /// <param name="request">The request.</param>
-    /// <param name="username">The username.</param>
-    /// <param name="password">The password.</param>
-    /// <param name="charBufferToClear">The char buffer to clear.</param>
-    /// <returns>A value indicating whether the operation succeeded.</returns>
+    /// <param name="request">request that defines the request to send.</param>
+    /// <param name="username">Receives the decoded username when parsing succeeds.</param>
+    /// <param name="password">Receives the decoded password when parsing succeeds.</param>
+    /// <param name="charBufferToClear">Receives the rented character buffer that the caller must clear and return.</param>
+    /// <returns>true if valid Basic credentials were decoded and assigned; otherwise, false.</returns>
     public static bool TryReadBasicCredentials(HttpRequestData request, out ReadOnlySpan<char> username, out ReadOnlySpan<char> password,
         out char[]? charBufferToClear)
     {
@@ -91,9 +91,9 @@ public static class BasicAuthParser
     }
 
     /// <summary>
-    /// Executes the clear operation.
+    /// Removes all entries managed by the Basic Auth Parser.
     /// </summary>
-    /// <param name="charBuffer">The char buffer.</param>
+    /// <param name="charBuffer">char Buffer to process.</param>
     public static void Clear(char[]? charBuffer)
     {
         if (charBuffer is null)
