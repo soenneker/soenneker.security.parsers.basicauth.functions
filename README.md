@@ -5,31 +5,78 @@
 
 # Soenneker.Security.Parsers.BasicAuth.Functions
 
-A library for basic authorization parsing.
+A low-allocation HTTP Basic credential parser for .NET isolated Azure Functions.
 
-## Install
+## Installation
 
 ```bash
 dotnet add package Soenneker.Security.Parsers.BasicAuth.Functions
 ```
 
-## Quick start
+## Usage
+
+The returned spans point into a pooled character buffer. Return that buffer in a `finally` block after the last credential comparison:
 
 ```csharp
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Soenneker.Security.Parsers.BasicAuth.Functions;
 
-var result = BasicAuthParser.TryReadBasicCredentials(/* supply request */ default!, /* supply username */ default!, /* supply password */ default!, /* supply charBufferToClear */ default!);
+[Function("ProtectedEndpoint")]
+public HttpResponseData Run(
+    [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData request)
+{
+    char[]? credentialBuffer = null;
+
+    try
+    {
+        if (!BasicAuthParser.TryReadBasicCredentials(
+                request,
+                out ReadOnlySpan<char> username,
+                out ReadOnlySpan<char> password,
+                out credentialBuffer))
+        {
+            return request.CreateResponse(HttpStatusCode.Unauthorized);
+        }
+
+        bool usernameMatches = username.SequenceEqual(_configuredUsername);
+        byte[] suppliedPassword = Encoding.UTF8.GetBytes(password);
+
+        try
+        {
+            bool passwordMatches = CryptographicOperations.FixedTimeEquals(
+                suppliedPassword,
+                _configuredPasswordUtf8);
+
+            return request.CreateResponse(
+                usernameMatches && passwordMatches
+                    ? HttpStatusCode.OK
+                    : HttpStatusCode.Unauthorized);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(suppliedPassword);
+        }
+    }
+    finally
+    {
+        BasicAuthParser.Clear(credentialBuffer);
+    }
+}
 ```
 
-Attempts to decode Basic authentication credentials from the request Authorization header.
+Prepare `_configuredPasswordUtf8` outside the request path and protect it like the original secret. Prefer a password hasher or identity provider when the endpoint authenticates user passwords rather than a fixed service credential.
 
-## What you get
+## Parsing behavior
 
-- `BasicAuthParser` — A library for basic authorization parsing.
+- Reads the first `Authorization` header value and accepts the `Basic` scheme case-insensitively.
+- Rejects missing or malformed Base64, headers above 8 KiB, and decoded credentials without a non-empty username and password separated by the first colon.
+- Allows additional colons in the password.
+- Returns spans instead of immutable username/password strings.
+- On success, transfers one rented character buffer to the caller. Call `BasicAuthParser.Clear` exactly once after using the spans.
+- On failure, clears and returns any rented buffer and leaves the returned buffer value `null`.
 
-## API at a glance
-
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `BasicAuthParser.TryReadBasicCredentials(request, username, password, charBufferToClear)` | Attempts to decode Basic authentication credentials from the request Authorization header. | true if valid Basic credentials were decoded and assigned; otherwise, false. |
-| `BasicAuthParser.Clear(charBuffer)` | Removes all entries managed by the Basic Auth Parser. | Returns no value; the requested change is complete when the method returns. |
+Basic authentication is encoding, not encryption. Use it only over HTTPS, never log the header or decoded credentials, and protect the endpoint with suitable rate limiting and secret rotation.
